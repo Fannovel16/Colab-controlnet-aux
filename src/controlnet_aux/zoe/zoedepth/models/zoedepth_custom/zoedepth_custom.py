@@ -29,13 +29,13 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from zoedepth.models.depth_model import DepthModel
-from zoedepth.models.base_models.midas import MidasCore
-from zoedepth.models.layers.attractor import AttractorLayer, AttractorLayerUnnormed
-from zoedepth.models.layers.dist_layers import ConditionalLogBinomial, ConditionalLogBinomialV2
-from zoedepth.models.layers.localbins_layers import (Projector, SeedBinRegressor,
+from controlnet_aux.zoe.zoedepth.models.depth_model import DepthModel
+from controlnet_aux.zoe.zoedepth.models.base_models.midas import MidasCore
+from controlnet_aux.zoe.zoedepth.models.layers.attractor import AttractorLayer, AttractorLayerUnnormed
+from controlnet_aux.zoe.zoedepth.models.layers.dist_layers import ConditionalLogBinomial, ConditionalLogBinomialV2
+from controlnet_aux.zoe.zoedepth.models.layers.localbins_layers import (Projector, SeedBinRegressor,
                                             SeedBinRegressorUnnormed)
-from zoedepth.models.model_io import load_state_from_resource
+from controlnet_aux.zoe.zoedepth.models.model_io import load_state_from_resource
 from torchvision.transforms import Normalize
 
 def get_activation(name, bank):

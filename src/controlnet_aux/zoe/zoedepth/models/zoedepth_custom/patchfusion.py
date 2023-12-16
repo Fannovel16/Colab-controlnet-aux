@@ -30,22 +30,22 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from zoedepth.models.depth_model import DepthModel
-from zoedepth.models.base_models.midas import MidasCore
-from zoedepth.models.layers.attractor import AttractorLayer, AttractorLayerUnnormed
-from zoedepth.models.layers.dist_layers import ConditionalLogBinomial, ConditionalLogBinomialV2
-from zoedepth.models.layers.localbins_layers import (Projector, SeedBinRegressor, SeedBinRegressorUnnormed)
-from zoedepth.models.model_io import load_state_from_resource
+from controlnet_aux.zoe.zoedepth.models.depth_model import DepthModel
+from controlnet_aux.zoe.zoedepth.models.base_models.midas import MidasCore
+from controlnet_aux.zoe.zoedepth.models.layers.attractor import AttractorLayer, AttractorLayerUnnormed
+from controlnet_aux.zoe.zoedepth.models.layers.dist_layers import ConditionalLogBinomial, ConditionalLogBinomialV2
+from controlnet_aux.zoe.zoedepth.models.layers.localbins_layers import (Projector, SeedBinRegressor, SeedBinRegressorUnnormed)
+from controlnet_aux.zoe.zoedepth.models.model_io import load_state_from_resource
 from torchvision.transforms import Normalize
 from torchvision.ops import roi_align as torch_roi_align
-from zoedepth.utils.misc import generatemask
+from controlnet_aux.zoe.zoedepth.utils.misc import generatemask
 
-from zoedepth.models.layers.transformer import TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
+from controlnet_aux.zoe.zoedepth.models.layers.transformer import TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
 
-from zoedepth.utils.misc import colorize, colors
+from controlnet_aux.zoe.zoedepth.utils.misc import colorize, colors
 import matplotlib.pyplot as plt
 
-from zoedepth.models.layers.fusion_network import UNetv1
+from controlnet_aux.zoe.zoedepth.models.layers.fusion_network import UNetv1
 import matplotlib.pyplot as plt
 
 import os
@@ -548,7 +548,7 @@ class PatchFusion(DepthModel):
 
     @staticmethod
     def build(midas_model_type="DPT_BEiT_L_384", pretrained_resource=None, use_pretrained_midas=False, train_midas=False, freeze_midas_bn=True, coarse_model_path=None, fine_model_path=None, **kwargs):
-        from zoedepth.models.zoedepth_custom.zoedepth_custom import ZoeDepthCustom
+        from controlnet_aux.zoe.zoedepth.models.zoedepth_custom.zoedepth_custom import ZoeDepthCustom
         
         print("build pretrained condition model from {}".format(coarse_model_path))
         coarse_model = ZoeDepthCustom.build(
