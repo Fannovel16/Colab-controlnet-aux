@@ -17,7 +17,7 @@
         "memory_efficient": true,
         "inverse_midas": false,
         "img_size": [384, 512],
-        "do_resize": false, // do resize in dataloader to speed up
+        "do_resize": false,
         "raw_depth_shape": [2160, 3840],
         "sr_ratio": 1,
         "sampled_training": false,

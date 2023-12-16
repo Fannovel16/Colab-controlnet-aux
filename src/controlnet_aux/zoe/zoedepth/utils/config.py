@@ -303,7 +303,7 @@ def parse_list(config, key, dtype=int):
                                                      ), f"{key} should be a list of values dtype {dtype}. Given {config[key]} of type {type(config[key])} with values of type {[type(e) for e in config[key]]}."
 
 
-def get_model_config(model_name, model_version=None):
+def get_model_config(model_name, model_version=None, model_cfg_path=""):
     """Find and parse the .json config file for the model.
 
     Args:
@@ -313,26 +313,33 @@ def get_model_config(model_name, model_version=None):
     Returns:
         easydict: the config dictionary for the model.
     """
-    config_fname = f"config_{model_name}_{model_version}.json" if model_version is not None else f"config_{model_name}.json"
-    config_file = os.path.join(ROOT, "models", model_name, config_fname)
+
+    if model_cfg_path != "":
+        config_file = model_cfg_path
+    else:
+        config_fname = f"config_{model_name}_{model_version}.json" if model_version is not None else f"config_{model_name}.json"
+        config_file = os.path.join(ROOT, "models", model_name, config_fname)
     if not os.path.exists(config_file):
         return None
-
-    with open(config_file, "r") as f:
+    
+    # with open(config_file, "r") as f:
+    #     config = edict(json.load(f))
+    # try to be more friendly
+    with open(config_file, 'r') as f:
         config = edict(json.load(f))
 
     # handle dictionary inheritance
     # only training config is supported for inheritance
     if "inherit" in config.train and config.train.inherit is not None:
-        inherit_config = get_model_config(config.train["inherit"]).train
+        inherit_config = get_model_config(config.train["inherit"], model_cfg_path=model_cfg_path).train
         for key, value in inherit_config.items():
             if key not in config.train:
                 config.train[key] = value
     return edict(config)
 
 
-def update_model_config(config, mode, model_name, model_version=None, strict=False):
-    model_config = get_model_config(model_name, model_version)
+def update_model_config(config, mode, model_name, model_version=None, strict=False, model_cfg_path=""):
+    model_config = get_model_config(model_name, model_version, model_cfg_path=model_cfg_path)
     if model_config is not None:
         config = {**config, **
                   flatten({**model_config.model, **model_config[mode]})}
