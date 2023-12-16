@@ -5,7 +5,7 @@ import cv2
 import yaml
 from pathlib import Path
 from enum import Enum
-from .log import log
+from log import log
 
 here = Path(__file__).parent.resolve()
 
