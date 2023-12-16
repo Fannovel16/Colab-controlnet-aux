@@ -29,6 +29,7 @@ import copy
 import torch
 import torch.nn as nn
 import numpy as np
+import cv2
 
 from controlnet_aux.zoe.zoedepth.models.depth_model import DepthModel
 from controlnet_aux.zoe.zoedepth.models.base_models.midas import MidasCore
@@ -38,16 +39,9 @@ from controlnet_aux.zoe.zoedepth.models.layers.localbins_layers import (Projecto
 from controlnet_aux.zoe.zoedepth.models.model_io import load_state_from_resource
 from torchvision.transforms import Normalize
 from torchvision.ops import roi_align as torch_roi_align
-from controlnet_aux.zoe.zoedepth.utils.misc import generatemask
 
 from controlnet_aux.zoe.zoedepth.models.layers.transformer import TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
-
-from controlnet_aux.zoe.zoedepth.utils.misc import colorize, colors
-import matplotlib.pyplot as plt
-
 from controlnet_aux.zoe.zoedepth.models.layers.fusion_network import UNetv1
-import matplotlib.pyplot as plt
-
 import os
 import torch.distributed as dist
 import torch.nn.functional as F
