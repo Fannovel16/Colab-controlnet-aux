@@ -30,7 +30,7 @@ from typing import Optional, List
 import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from custom_timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
 def _get_activation_fn(activation):
     """Return an activation function given a string"""
