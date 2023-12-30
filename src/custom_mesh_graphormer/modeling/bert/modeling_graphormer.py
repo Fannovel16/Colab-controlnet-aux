@@ -219,7 +219,6 @@ class EncoderBlock(BertPreTrainedModel):
         if self.use_img_layernorm:
             self.LayerNorm = LayerNormClass(config.hidden_size, eps=config.img_layer_norm_eps)
 
-        self.apply(self.init_weights)
 
     def _prune_heads(self, heads_to_prune):
         """ Prunes heads of the model.
