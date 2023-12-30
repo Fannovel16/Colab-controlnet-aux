@@ -14,8 +14,8 @@ try:
 except ImportError:
     import pickle
 
-from src.utils.geometric_layers import rodrigues
-import src.modeling.data.config as cfg
+from custom_mesh_graphormer.utils.geometric_layers import rodrigues
+import custom_mesh_graphormer.modeling.data.config as cfg
 
 class SMPL(nn.Module):
 

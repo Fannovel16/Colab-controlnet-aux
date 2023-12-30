@@ -12,9 +12,9 @@ import os.path as op
 import numpy as np
 import code
 
-from src.utils.tsv_file import TSVFile, CompositeTSVFile
-from src.utils.tsv_file_ops import load_linelist_file, load_from_yaml_file, find_file_path_in_yaml
-from src.utils.image_ops import img_from_base64, crop, flip_img, flip_pose, flip_kp, transform, rot_aa
+from custom_mesh_graphormer.utils.tsv_file import TSVFile, CompositeTSVFile
+from custom_mesh_graphormer.utils.tsv_file_ops import load_linelist_file, load_from_yaml_file, find_file_path_in_yaml
+from custom_mesh_graphormer.utils.image_ops import img_from_base64, crop, flip_img, flip_pose, flip_kp, transform, rot_aa
 import torch
 import torchvision.transforms as transforms
 

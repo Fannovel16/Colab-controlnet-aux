@@ -8,7 +8,7 @@ import json
 import zipfile
 import torch
 import numpy as np
-from src.utils.metric_pampjpe import get_alignMesh
+from custom_mesh_graphormer.utils.metric_pampjpe import get_alignMesh
 
 
 def load_pred_json(filepath):

@@ -16,7 +16,7 @@ import json
 import code
 from custom_manopth.manolayer import ManoLayer
 import scipy.sparse
-import src.modeling.data.config as cfg
+import custom_mesh_graphormer.modeling.data.config as cfg
 from pathlib import Path
 
 class MANO(nn.Module):

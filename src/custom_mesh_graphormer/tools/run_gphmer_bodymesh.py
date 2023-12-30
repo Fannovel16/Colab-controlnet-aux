@@ -20,22 +20,22 @@ from torchvision.utils import make_grid
 import gc
 import numpy as np
 import cv2
-from src.modeling.bert import BertConfig, Graphormer
-from src.modeling.bert import Graphormer_Body_Network as Graphormer_Network
-from src.modeling._smpl import SMPL, Mesh
-from src.modeling.hrnet.hrnet_cls_net_gridfeat import get_cls_net_gridfeat
-from src.modeling.hrnet.config import config as hrnet_config
-from src.modeling.hrnet.config import update_config as hrnet_update_config
-import src.modeling.data.config as cfg
-from src.datasets.build import make_data_loader
+from custom_mesh_graphormer.modeling.bert import BertConfig, Graphormer
+from custom_mesh_graphormer.modeling.bert import Graphormer_Body_Network as Graphormer_Network
+from custom_mesh_graphormer.modeling._smpl import SMPL, Mesh
+from custom_mesh_graphormer.modeling.hrnet.hrnet_cls_net_gridfeat import get_cls_net_gridfeat
+from custom_mesh_graphormer.modeling.hrnet.config import config as hrnet_config
+from custom_mesh_graphormer.modeling.hrnet.config import update_config as hrnet_update_config
+import custom_mesh_graphormer.modeling.data.config as cfg
+from custom_mesh_graphormer.datasets.build import make_data_loader
 
-from src.utils.logger import setup_logger
-from src.utils.comm import synchronize, is_main_process, get_rank, get_world_size, all_gather
-from src.utils.miscellaneous import mkdir, set_seed
-from src.utils.metric_logger import AverageMeter, EvalMetricsLogger
-from src.utils.renderer import Renderer, visualize_reconstruction, visualize_reconstruction_test
-from src.utils.metric_pampjpe import reconstruction_error
-from src.utils.geometric_layers import orthographic_projection
+from custom_mesh_graphormer.utils.logger import setup_logger
+from custom_mesh_graphormer.utils.comm import synchronize, is_main_process, get_rank, get_world_size, all_gather
+from custom_mesh_graphormer.utils.miscellaneous import mkdir, set_seed
+from custom_mesh_graphormer.utils.metric_logger import AverageMeter, EvalMetricsLogger
+from custom_mesh_graphormer.utils.renderer import Renderer, visualize_reconstruction, visualize_reconstruction_test
+from custom_mesh_graphormer.utils.metric_pampjpe import reconstruction_error
+from custom_mesh_graphormer.utils.geometric_layers import orthographic_projection
 
 from azureml.core.run import Run
 aml_run = Run.get_context()
