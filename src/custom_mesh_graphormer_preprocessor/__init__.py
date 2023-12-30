@@ -139,14 +139,14 @@ class MeshGraphormerMediapipe(Preprocessor):
             
             # create backbone model
             if args.arch=='hrnet':
-                hrnet_yaml = 'MeshGraphormer/models/hrnet/cls_hrnet_w40_sgd_lr5e-2_wd1e-4_bs32_x100.yaml'
-                hrnet_checkpoint = 'MeshGraphormer/models/hrnet/hrnetv2_w40_imagenet_pretrained.pth'
+                hrnet_yaml = Path(__file__).parent / 'cls_hrnet_w40_sgd_lr5e-2_wd1e-4_bs32_x100.yaml'
+                hrnet_checkpoint = custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w40_imagenet_pretrained.pth', cache_dir=annotator_ckpts_path)
                 hrnet_update_config(hrnet_config, hrnet_yaml)
                 backbone = get_cls_net_gridfeat(hrnet_config, pretrained=hrnet_checkpoint)
                 #logger.info('=> loading hrnet-v2-w40 model')
             elif args.arch=='hrnet-w64':
-                hrnet_yaml = 'MeshGraphormer/models/hrnet/cls_hrnet_w64_sgd_lr5e-2_wd1e-4_bs32_x100.yaml'
-                hrnet_checkpoint = 'MeshGraphormer/models/hrnet/hrnetv2_w64_imagenet_pretrained.pth'
+                hrnet_yaml = Path(__file__).parent / 'cls_hrnet_w64_sgd_lr5e-2_wd1e-4_bs32_x100.yaml'
+                hrnet_checkpoint = custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w64_imagenet_pretrained.pth', cache_dir=annotator_ckpts_path)
                 hrnet_update_config(hrnet_config, hrnet_yaml)
                 backbone = get_cls_net_gridfeat(hrnet_config, pretrained=hrnet_checkpoint)
                 #logger.info('=> loading hrnet-v2-w64 model')
