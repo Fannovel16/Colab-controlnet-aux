@@ -301,7 +301,6 @@ class Graphormer(BertPreTrainedModel):
         self.bert = EncoderBlock(config)
         self.cls_head = nn.Linear(config.hidden_size, self.config.output_feature_dim)
         self.residual = nn.Linear(config.img_feature_dim, self.config.output_feature_dim)
-        self.apply(self.init_weights)
 
     def forward(self, img_feats, input_ids=None, token_type_ids=None, attention_mask=None, masked_lm_labels=None,
             next_sentence_label=None, position_ids=None, head_mask=None):
