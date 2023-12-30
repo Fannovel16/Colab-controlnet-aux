@@ -36,7 +36,6 @@ from matplotlib import pyplot
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from config import handrefiner_root
 from torchvision import transforms
 from pathlib import Path
 from controlnet_aux.util import custom_hf_download, annotator_ckpts_path
@@ -45,7 +44,7 @@ import custom_mesh_graphormer
 args = Namespace(
     num_workers=4,
     img_scale_factor=1,
-    image_file_or_path=os.path.join(handrefiner_root, 'MeshGraphormer', 'samples', 'hand'), 
+    image_file_or_path=os.path.join('', 'MeshGraphormer', 'samples', 'hand'), 
     model_name_or_path=str(Path(custom_mesh_graphormer.__file__).parent / "modeling/bert/bert-base-uncased"),
     resume_checkpoint=custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'graphormer_hand_state_dict.bin', cache_dir=annotator_ckpts_path),
     output_dir='output/',
