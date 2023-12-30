@@ -17,12 +17,13 @@ import code
 from custom_manopth.manolayer import ManoLayer
 import scipy.sparse
 import src.modeling.data.config as cfg
+from pathlib import Path
 
 class MANO(nn.Module):
     def __init__(self):
         super(MANO, self).__init__()
 
-        self.mano_dir = '/content/HandRefiner/MeshGraphormer/src/modeling/data'
+        self.mano_dir = str(Path(__file__).parent / "data")
         self.layer = self.get_layer()
         self.vertex_num = 778
         self.face = self.layer.th_faces.numpy()
