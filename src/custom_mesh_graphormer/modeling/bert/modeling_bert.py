@@ -1,1 +1,1 @@
-../../../transformers/pytorch_transformers/modeling_bert.py
+from transformers.modeling_bert import *
