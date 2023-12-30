@@ -14,7 +14,7 @@ import torch.nn as nn
 import os.path as osp
 import json
 import code
-from manopth.manolayer import ManoLayer
+from custom_manopth.manolayer import ManoLayer
 import scipy.sparse
 import src.modeling.data.config as cfg
 
@@ -22,7 +22,7 @@ class MANO(nn.Module):
     def __init__(self):
         super(MANO, self).__init__()
 
-        self.mano_dir = 'src/modeling/data'
+        self.mano_dir = '/content/HandRefiner/MeshGraphormer/src/modeling/data'
         self.layer = self.get_layer()
         self.vertex_num = 778
         self.face = self.layer.th_faces.numpy()
