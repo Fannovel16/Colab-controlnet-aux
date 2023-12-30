@@ -1,1 +1,1 @@
-../../../transformers/pytorch_transformers/file_utils.py
+from transformers.file_utils import *
