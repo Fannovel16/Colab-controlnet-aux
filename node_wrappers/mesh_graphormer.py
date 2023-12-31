@@ -35,7 +35,7 @@ def install_deps():
     try:
         import pyembree
     except ImportError:
-        run_script([sys.executable, '-s', '-m', 'pip', 'install', 'trimesh pyembree embreex yacs'])
+        run_script([sys.executable, '-s', '-m', 'pip', 'install', 'trimesh', 'pyembree', 'embreex', 'yacs'])
 
 class Mesh_Graphormer_Depth_Map_Preprocessor:
     @classmethod
