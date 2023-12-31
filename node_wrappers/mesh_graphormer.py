@@ -1,4 +1,4 @@
-from utils import common_annotator_call, annotator_ckpts_path, HF_MODEL_NAME, create_node_input_types
+from ..utils import common_annotator_call, annotator_ckpts_path, HF_MODEL_NAME, create_node_input_types
 import comfy.model_management as model_management
 import numpy as np
 import torch
@@ -67,5 +67,5 @@ NODE_CLASS_MAPPINGS = {
     "MeshGraphormer-DepthMapPreprocessor": Mesh_Graphormer_Depth_Map_Preprocessor
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "MeshGraphormer-DepthMapPreprocessor": "Mesh Graphormer - Hand Depth Map"
+    "MeshGraphormer-DepthMapPreprocessor": "Mesh Graphormer - Hand Depth Map & Mask"
 }
