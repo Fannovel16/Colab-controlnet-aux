@@ -40,13 +40,14 @@ from torchvision import transforms
 from pathlib import Path
 from controlnet_aux.util import custom_hf_download, annotator_ckpts_path
 import custom_mesh_graphormer
+from comfy.model_management import soft_empty_cache
 
 args = Namespace(
     num_workers=4,
     img_scale_factor=1,
     image_file_or_path=os.path.join('', 'MeshGraphormer', 'samples', 'hand'), 
     model_name_or_path=str(Path(custom_mesh_graphormer.__file__).parent / "modeling/bert/bert-base-uncased"),
-    resume_checkpoint=custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'graphormer_hand_state_dict.bin', cache_dir=annotator_ckpts_path),
+    resume_checkpoint=None,
     output_dir='output/',
     config_name='',
     a='hrnet-w64',
@@ -60,8 +61,9 @@ args = Namespace(
     which_gcn='0,0,1',
     mesh_type='hand',
     run_eval_only=True,
-    device='cuda',
-    seed=88
+    device="cpu",
+    seed=88,
+    hrnet_checkpoint=custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w64_imagenet_pretrained.pth', cache_dir=annotator_ckpts_path)
 )
 
 
@@ -80,7 +82,7 @@ class MeshGraphormerMediapipe(Preprocessor):
 
         # Mesh and MANO utils
         mano_model = MANO().to(args.device)
-        mano_model.layer = mano_model.layer.cuda()
+        mano_model.layer = mano_model.layer.to(args.device)
         mesh_sampler = Mesh()
 
         # Renderer for visualization
@@ -140,13 +142,13 @@ class MeshGraphormerMediapipe(Preprocessor):
             # create backbone model
             if args.arch=='hrnet':
                 hrnet_yaml = Path(__file__).parent / 'cls_hrnet_w40_sgd_lr5e-2_wd1e-4_bs32_x100.yaml'
-                hrnet_checkpoint = custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w40_imagenet_pretrained.pth', cache_dir=annotator_ckpts_path)
+                hrnet_checkpoint = args.hrnet_checkpoint
                 hrnet_update_config(hrnet_config, hrnet_yaml)
                 backbone = get_cls_net_gridfeat(hrnet_config, pretrained=hrnet_checkpoint)
                 #logger.info('=> loading hrnet-v2-w40 model')
             elif args.arch=='hrnet-w64':
                 hrnet_yaml = Path(__file__).parent / 'cls_hrnet_w64_sgd_lr5e-2_wd1e-4_bs32_x100.yaml'
-                hrnet_checkpoint = custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w64_imagenet_pretrained.pth', cache_dir=annotator_ckpts_path)
+                hrnet_checkpoint = args.hrnet_checkpoint
                 hrnet_update_config(hrnet_config, hrnet_yaml)
                 backbone = get_cls_net_gridfeat(hrnet_config, pretrained=hrnet_checkpoint)
                 #logger.info('=> loading hrnet-v2-w64 model')
@@ -173,7 +175,7 @@ class MeshGraphormerMediapipe(Preprocessor):
                 _model.load_state_dict(state_dict, strict=False)
                 del state_dict
                 gc.collect()
-                torch.cuda.empty_cache()
+                soft_empty_cache()
 
         # update configs to enable attention outputs
         setattr(_model.trans_encoder[-1].config,'output_attentions', True)
@@ -234,13 +236,14 @@ class MeshGraphormerMediapipe(Preprocessor):
         return bbx_min, bbx_max, bby_min, bby_max
 
     def run_inference(self, img, Graphormer_model, mano, mesh_sampler, scale, crop_len):
-    # switch to evaluate mode
+        global args
         H, W = int(crop_len), int(crop_len)
         Graphormer_model.eval()
         mano.eval()
+        device = next(Graphormer_model.parameters()).device
         with torch.no_grad():
             img_tensor = self.transform(img)
-            batch_imgs = torch.unsqueeze(img_tensor, 0).cuda()
+            batch_imgs = torch.unsqueeze(img_tensor, 0).to(device)
             
             # forward-pass
             pred_camera, pred_3d_joints, pred_vertices_sub, pred_vertices, hidden_states, att = Graphormer_model(batch_imgs, mano, mesh_sampler)
@@ -290,13 +293,11 @@ class MeshGraphormerMediapipe(Preprocessor):
         return depthmap, pred_2d_joints_img_space
 
 
-    def get_depth(self, input_dir, file_name, padding):
+    def get_depth(self, np_image, padding):
         info = {}
-        
-        image_file = os.path.join(input_dir, file_name)
 
         # STEP 3: Load the input image.
-        image = mp.Image.create_from_file(image_file)
+        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image)
 
         # STEP 4: Detect hand landmarks from the input image.
         detection_result = self.detector.detect(image)
@@ -310,7 +311,6 @@ class MeshGraphormerMediapipe(Preprocessor):
 
         # HANDLANDMARKS CAN BE EMPTY, HANDLE THIS!
         if len(hand_landmarks_list) == 0:
-            print("Cannot detect hands for original image {}".format(file_name))
             return None, None, None
         raw_image = raw_image[:, :, :3]
 
@@ -376,7 +376,6 @@ class MeshGraphormerMediapipe(Preprocessor):
             cropped_depthmap, pred_2d_keypoints = self.run_inference(graphormer_input.astype(np.uint8), self._model, self.mano_model, self.mesh_sampler, scale, int(crop_len)) 
 
             if cropped_depthmap is None:
-                print("Depth reconstruction failed for image {}".format(file_name))
                 depth_failure = True
                 break
             #keypoints_image_space = pred_2d_keypoints * (crop_y_max - crop_y_min + 1)/224
@@ -387,7 +386,6 @@ class MeshGraphormerMediapipe(Preprocessor):
             resized_cropped_depthmap = cv2.resize(cropped_depthmap, (int(crop_len), int(crop_len)), interpolation=cv2.INTER_LINEAR)
             nonzero_y, nonzero_x = (resized_cropped_depthmap != 0).nonzero()
             if len(nonzero_y) == 0 or len(nonzero_x) == 0:
-                print("Depth reconstruction failed for image {}".format(file_name))
                 depth_failure = True
                 break
             padded_depthmap[crop_y_min+nonzero_y, crop_x_min+nonzero_x] = resized_cropped_depthmap[nonzero_y, nonzero_x]
@@ -417,13 +415,15 @@ class MeshGraphormerMediapipe(Preprocessor):
         return depthmap, mask, info
     
     def get_keypoints(self, img, Graphormer_model, mano, mesh_sampler, scale, crop_len):
+        global args
         H, W = int(crop_len), int(crop_len)
         Graphormer_model.eval()
         mano.eval()
+        device = next(Graphormer_model.parameters()).device
         with torch.no_grad():
             img_tensor = self.transform(img)
             #print(img_tensor)
-            batch_imgs = torch.unsqueeze(img_tensor, 0).cuda()
+            batch_imgs = torch.unsqueeze(img_tensor, 0).to(device)
             
             # forward-pass
             pred_camera, pred_3d_joints, pred_vertices_sub, pred_vertices, hidden_states, att = Graphormer_model(batch_imgs, mano, mesh_sampler)
