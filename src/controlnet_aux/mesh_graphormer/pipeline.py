@@ -83,7 +83,7 @@ class MeshGraphormerMediapipe(Preprocessor):
         # Mesh and MANO utils
         mano_model = MANO().to(args.device)
         mano_model.layer = mano_model.layer.to(args.device)
-        mesh_sampler = Mesh()
+        mesh_sampler = Mesh(device=args.device)
 
         # Renderer for visualization
         # renderer = Renderer(faces=mano_model.face)
@@ -297,7 +297,8 @@ class MeshGraphormerMediapipe(Preprocessor):
         info = {}
 
         # STEP 3: Load the input image.
-        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image)
+        #https://stackoverflow.com/a/76407270
+        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image.copy())
 
         # STEP 4: Detect hand landmarks from the input image.
         detection_result = self.detector.detect(image)
