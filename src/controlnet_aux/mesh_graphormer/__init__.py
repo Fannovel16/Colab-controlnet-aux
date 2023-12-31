@@ -27,8 +27,9 @@ class MeshGraphormerDetector:
         input_image, output_type = common_input_validate(input_image, output_type, **kwargs)
 
         depth_map, mask, info = self.pipeline.get_depth(input_image, mask_bbox_padding)
-        depth_map = depth_map or np.zeros_like(input_image)
-        mask = mask or np.zeros_like(mask)
+        if depth_map is None:
+            depth_map = np.zeros_like(input_image)
+            mask = np.zeros_like(mask)
 
         #The hand is small
         depth_map, mask = HWC3(depth_map), HWC3(mask)
