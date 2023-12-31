@@ -2,7 +2,7 @@ import os
 import torch
 import gc
 import numpy as np
-from custom_mesh_graphormer_preprocessor.depth_preprocessor import Preprocessor
+from controlnet_aux.mesh_graphormer.depth_preprocessor import Preprocessor
 
 import torchvision.models as models
 from custom_mesh_graphormer.modeling.bert import BertConfig, Graphormer
