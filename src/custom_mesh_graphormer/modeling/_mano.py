@@ -80,6 +80,9 @@ class SparseMM(torch.autograd.Function):
         return None, grad_input
 
 def spmm(sparse, dense):
+    device = torch.device('cuda:0')
+    sparse = sparse.to(device)
+    dense = dense.to(device)
     return SparseMM.apply(sparse, dense)
 
 
