@@ -11,34 +11,21 @@ from custom_mesh_graphormer.modeling._mano import MANO, Mesh
 from custom_mesh_graphormer.modeling.hrnet.hrnet_cls_net_gridfeat import get_cls_net_gridfeat
 from custom_mesh_graphormer.modeling.hrnet.config import config as hrnet_config
 from custom_mesh_graphormer.modeling.hrnet.config import update_config as hrnet_update_config
-import custom_mesh_graphormer.modeling.data.config as cfg
-from custom_mesh_graphormer.datasets.build import make_hand_data_loader
-
-from custom_mesh_graphormer.utils.logger import setup_logger
-from custom_mesh_graphormer.utils.comm import synchronize, is_main_process, get_rank, get_world_size, all_gather
-from custom_mesh_graphormer.utils.miscellaneous import mkdir, set_seed
-from custom_mesh_graphormer.utils.metric_logger import AverageMeter
-
-from custom_mesh_graphormer.utils.metric_pampjpe import reconstruction_error
-from custom_mesh_graphormer.utils.geometric_layers import orthographic_projection
+from custom_mesh_graphormer.utils.miscellaneous import set_seed
 from argparse import Namespace
 from pathlib import Path
 import cv2
-
-from PIL import Image
 from torchvision import transforms
 import numpy as np
 import cv2
 from trimesh import Trimesh
-from trimesh.ray.ray_pyembree import RayMeshIntersector
-from matplotlib import pyplot
-
+from trimesh.ray.ray_triangle import RayMeshIntersector
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from torchvision import transforms
 from pathlib import Path
-from controlnet_aux.util import custom_hf_download, annotator_ckpts_path
+from controlnet_aux.util import custom_hf_download
 import custom_mesh_graphormer
 from comfy.model_management import soft_empty_cache
 from packaging import version
@@ -64,10 +51,10 @@ args = Namespace(
     run_eval_only=True,
     device="cpu",
     seed=88,
-    hrnet_checkpoint=custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w64_imagenet_pretrained.pth', cache_dir=annotator_ckpts_path)
+    hrnet_checkpoint=custom_hf_download("hr16/ControlNet-HandRefiner-pruned", 'hrnetv2_w64_imagenet_pretrained.pth')
 )
 
-#Since mediapipe v0.10.5, the hand  category has been correct
+#Since mediapipe v0.10.5, the hand category has been correct
 if version.parse(mp.__version__) >= version.parse('0.10.5'):
     true_hand_category = {"Right": "right", "Left": "left"}
 else:

@@ -1,4 +1,4 @@
-from ..utils import common_annotator_call, annotator_ckpts_path, HF_MODEL_NAME, DWPOSE_MODEL_NAME, create_node_input_types
+from ..utils import common_annotator_call, create_node_input_types
 import comfy.model_management as model_management
 import os, sys
 import subprocess, threading
@@ -41,7 +41,7 @@ class Media_Pipe_Face_Mesh_Preprocessor:
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "detect"
 
-    CATEGORY = "ControlNet Preprocessors/Faces and Poses"
+    CATEGORY = "ControlNet Preprocessors/Faces and Poses Estimators"
 
     def detect(self, image, max_faces, min_confidence, resolution=512):
         #Ref: https://github.com/Fannovel16/comfy_controlnet_preprocessors/issues/70#issuecomment-1677967369

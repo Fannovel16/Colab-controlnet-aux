@@ -1,4 +1,4 @@
-from ..utils import common_annotator_call, annotator_ckpts_path, HF_MODEL_NAME, DWPOSE_MODEL_NAME, create_node_input_types
+from ..utils import common_annotator_call, create_node_input_types
 import comfy.model_management as model_management
 import numpy as np
 import warnings
@@ -6,6 +6,7 @@ from controlnet_aux.dwpose import DwposeDetector, AnimalposeDetector
 import os
 import json
 
+DWPOSE_MODEL_NAME = "yzd-v/DWPose"
 #Trigger startup caching for onnxruntime
 GPU_PROVIDERS = ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CoreMLExecutionProvider"]
 def check_ort_gpu():
@@ -37,17 +38,17 @@ class DWPose_Preprocessor:
         input_types["optional"] = {
             **input_types["optional"],
             "bbox_detector": (
-                ["yolox_l.torchscript.pt", "yolox_m.torchscript.pt", "yolox_s.torchscript.pt", "yolo_nas_l_fp16.onnx", "yolo_nas_m_fp16.onnx", "yolo_nas_s_fp16.onnx", "yolox_l.onnx", "yolox_m.onnx", "yolox_s.onnx"],
-                {"default": "yolox_l.onnx"}
+                ["yolox_l.torchscript.pt", "yolox_l.onnx", "yolo_nas_l_fp16.onnx", "yolo_nas_m_fp16.onnx", "yolo_nas_s_fp16.onnx"],
+                {"default": "yolox_l.torchscript.pt"}
             ),
-            "pose_estimator": (["dw-ll_ucoco_384_bs5.torchscript.pt", "dw-ll_ucoco_384.onnx", "dw-ll_ucoco.onnx", "dw-mm_ucoco.onnx", "dw-ss_ucoco.onnx"], {"default": "dw-ll_ucoco_384.onnx"})
+            "pose_estimator": (["dw-ll_ucoco_384_bs5.torchscript.pt", "dw-ll_ucoco_384.onnx", "dw-ll_ucoco.onnx"], {"default": "dw-ll_ucoco_384_bs5.torchscript.pt"})
         }
         return input_types
 
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "estimate_pose"
 
-    CATEGORY = "ControlNet Preprocessors/Faces and Poses"
+    CATEGORY = "ControlNet Preprocessors/Faces and Poses Estimators"
 
     def estimate_pose(self, image, detect_hand, detect_body, detect_face, resolution=512, bbox_detector="yolox_l.onnx", pose_estimator="dw-ll_ucoco_384.onnx", **kwargs):
         if bbox_detector == "yolox_l.onnx":
@@ -71,7 +72,7 @@ class DWPose_Preprocessor:
         model = DwposeDetector.from_pretrained(
             pose_repo,
             yolo_repo,
-            cache_dir=annotator_ckpts_path, det_filename=bbox_detector, pose_filename=pose_estimator,
+            det_filename=bbox_detector, pose_filename=pose_estimator,
             torchscript_device=model_management.get_torch_device()
         )
         detect_hand = detect_hand == "enable"
@@ -95,16 +96,16 @@ class AnimalPose_Preprocessor:
     def INPUT_TYPES(s):
         return create_node_input_types(
             bbox_detector = (
-                ["yolox_l.torchscript.pt", "yolox_m.torchscript.pt", "yolox_s.torchscript.pt", "yolo_nas_l_fp16.onnx", "yolo_nas_m_fp16.onnx", "yolo_nas_s_fp16.onnx", "yolox_l.onnx", "yolox_m.onnx", "yolox_s.onnx"],
-                {"default": "yolox_l.onnx"}
+                ["yolox_l.torchscript.pt", "yolox_l.onnx", "yolo_nas_l_fp16.onnx", "yolo_nas_m_fp16.onnx", "yolo_nas_s_fp16.onnx"],
+                {"default": "yolox_l.torchscript.pt"}
             ),
-            pose_estimator = (["rtmpose-m_ap10k_256_bs5.torchscript.pt", "rtmpose-m_ap10k_256.onnx"], {"default": "rtmpose-m_ap10k_256.onnx"})
+            pose_estimator = (["rtmpose-m_ap10k_256_bs5.torchscript.pt", "rtmpose-m_ap10k_256.onnx"], {"default": "rtmpose-m_ap10k_256_bs5.torchscript.pt"})
         )
 
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "estimate_pose"
 
-    CATEGORY = "ControlNet Preprocessors/Faces and Poses"
+    CATEGORY = "ControlNet Preprocessors/Faces and Poses Estimators"
 
     def estimate_pose(self, image, resolution=512, bbox_detector="yolox_l.onnx", pose_estimator="rtmpose-m_ap10k_256.onnx", **kwargs):
         if bbox_detector == "yolox_l.onnx":
@@ -128,7 +129,7 @@ class AnimalPose_Preprocessor:
         model = AnimalposeDetector.from_pretrained(
             pose_repo,
             yolo_repo,
-            cache_dir=annotator_ckpts_path, det_filename=bbox_detector, pose_filename=pose_estimator,
+            det_filename=bbox_detector, pose_filename=pose_estimator,
             torchscript_device=model_management.get_torch_device()
         )
 
@@ -150,6 +151,6 @@ NODE_CLASS_MAPPINGS = {
     "AnimalPosePreprocessor": AnimalPose_Preprocessor
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "DWPreprocessor": "DWPose Estimation",
-    "AnimalPosePreprocessor": "Animal Pose Estimation (AP10K)"
+    "DWPreprocessor": "DWPose Estimator",
+    "AnimalPosePreprocessor": "AnimalPose Estimator (AP10K)"
 }

@@ -1,4 +1,4 @@
-from ..utils import common_annotator_call, annotator_ckpts_path, HF_MODEL_NAME, create_node_input_types
+from ..utils import common_annotator_call, create_node_input_types
 import comfy.model_management as model_management
 
 class LERES_Depth_Map_Preprocessor:
@@ -13,12 +13,12 @@ class LERES_Depth_Map_Preprocessor:
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "execute"
 
-    CATEGORY = "ControlNet Preprocessors/Normal and Depth Map"
+    CATEGORY = "ControlNet Preprocessors/Normal and Depth Estimators"
 
     def execute(self, image, rm_nearest, rm_background, resolution=512, **kwargs):
         from controlnet_aux.leres import LeresDetector
 
-        model = LeresDetector.from_pretrained(HF_MODEL_NAME, cache_dir=annotator_ckpts_path).to(model_management.get_torch_device())
+        model = LeresDetector.from_pretrained().to(model_management.get_torch_device())
         out = common_annotator_call(model, image, resolution=resolution, thr_a=rm_nearest, thr_b=rm_background, boost=kwargs["boost"] == "enable")
         del model
         return (out, )
@@ -27,5 +27,5 @@ NODE_CLASS_MAPPINGS = {
     "LeReS-DepthMapPreprocessor": LERES_Depth_Map_Preprocessor
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LeReS-DepthMapPreprocessor": "LeReS - Depth Map (enable boost for leres++)"
+    "LeReS-DepthMapPreprocessor": "LeReS Depth Map (enable boost for leres++)"
 }

@@ -21,7 +21,7 @@ import torch
 from huggingface_hub import hf_hub_download
 from PIL import Image
 
-from controlnet_aux.util import HWC3, common_input_validate, resize_image_with_pad, annotator_ckpts_path, custom_hf_download
+from controlnet_aux.util import HWC3, common_input_validate, resize_image_with_pad, custom_hf_download, HF_MODEL_NAME
 from . import util
 from .body import Body, BodyResult, Keypoint
 from .face import Face
@@ -111,11 +111,7 @@ class OpenposeDetector:
         self.face_estimation = face_estimation
 
     @classmethod
-    def from_pretrained(cls, pretrained_model_or_path, filename=None, hand_filename=None, face_filename=None, cache_dir=annotator_ckpts_path):
-        filename = filename or "body_pose_model.pth"
-        hand_filename = hand_filename or "hand_pose_model.pth"
-        face_filename = face_filename or "facenet.pth"
-
+    def from_pretrained(cls, pretrained_model_or_path=HF_MODEL_NAME, filename="body_pose_model.pth", hand_filename="hand_pose_model.pth", face_filename="facenet.pth"):
         if pretrained_model_or_path == "lllyasviel/ControlNet":
             subfolder = "annotator/ckpts"
             face_pretrained_model_or_path = "lllyasviel/Annotators"
@@ -124,9 +120,9 @@ class OpenposeDetector:
             subfolder = ''
             face_pretrained_model_or_path = pretrained_model_or_path
 
-        body_model_path = custom_hf_download(pretrained_model_or_path, filename, cache_dir=cache_dir, subfolder=subfolder)
-        hand_model_path = custom_hf_download(pretrained_model_or_path, hand_filename, cache_dir=cache_dir, subfolder=subfolder)
-        face_model_path = custom_hf_download(face_pretrained_model_or_path, face_filename, cache_dir=cache_dir, subfolder=subfolder)
+        body_model_path = custom_hf_download(pretrained_model_or_path, filename, subfolder=subfolder)
+        hand_model_path = custom_hf_download(pretrained_model_or_path, hand_filename, subfolder=subfolder)
+        face_model_path = custom_hf_download(face_pretrained_model_or_path, face_filename, subfolder=subfolder)
 
         body_estimation = Body(body_model_path)
         hand_estimation = Hand(hand_model_path)
