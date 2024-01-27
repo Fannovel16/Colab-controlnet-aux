@@ -206,7 +206,7 @@ class DwposeDetector:
             detected_map = Image.fromarray(detected_map)
         
         if image_and_json:
-            return (detected_map, encode_poses_as_dict(poses, detected_map.shape[0], detected_map.shape[1]))
+            return (detected_map, encode_poses_as_dict(poses, input_image.shape[0], input_image.shape[1]))
         
         return detected_map
 
@@ -244,9 +244,18 @@ class AnimalposeDetector:
     def __call__(self, input_image, detect_resolution=512, output_type="pil", image_and_json=False, upscale_method="INTER_CUBIC", **kwargs):
         input_image, output_type = common_input_validate(input_image, output_type, **kwargs)
         input_image, remove_pad = resize_image_with_pad(input_image, detect_resolution, upscale_method)
-        detected_map, openpose_dict = self.animal_pose_estimation(input_image)
+        result = self.animal_pose_estimation(input_image)
+        if result is None:
+            detected_map = np.zeros_like(input_image)
+            openpose_dict = {
+                'version': 'ap10k',
+                'animals': [],
+                'canvas_height': input_image.shape[0],
+                'canvas_width': input_image.shape[1]
+            }
+        else:
+            detected_map, openpose_dict = result
         detected_map = remove_pad(detected_map)
-
         if output_type == "pil":
             detected_map = Image.fromarray(detected_map)
         

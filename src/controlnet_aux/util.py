@@ -8,12 +8,16 @@ from pathlib import Path
 import warnings
 from huggingface_hub import hf_hub_download
 
+TORCHHUB_PATH = Path(__file__).parent / 'depth_anything' / 'torchhub'
 HF_MODEL_NAME = "lllyasviel/Annotators"
 DWPOSE_MODEL_NAME = "yzd-v/DWPose"
-ANIFACESEG_MODEL_NAME = "bdsqlsz/qinglong_controlnet-lllite"
+BDS_MODEL_NAME = "bdsqlsz/qinglong_controlnet-lllite"
 DENSEPOSE_MODEL_NAME = "LayerNorm/DensePose-TorchScript-with-hint-image"
 MESH_GRAPHORMER_MODEL_NAME = "hr16/ControlNet-HandRefiner-pruned"
 SAM_MODEL_NAME = "dhkim2810/MobileSAM"
+UNIMATCH_MODEL_NAME = "hr16/Unimatch"
+DEPTH_ANYTHING_MODEL_NAME = "LiheYoung/Depth-Anything" #HF Space
+DIFFUSION_EDGE_MODEL_NAME = "hr16/Diffusion-Edge"
 
 annotator_ckpts_path = os.path.join(Path(__file__).parents[2], 'ckpts')
 USE_SYMLINKS = False
@@ -60,8 +64,11 @@ def HWC3(x):
         return y
 
 
-def make_noise_disk(H, W, C, F):
-    noise = np.random.uniform(low=0, high=1, size=((H // F) + 2, (W // F) + 2, C))
+def make_noise_disk(H, W, C, F, rng=None):
+    if rng:
+        noise = rng.uniform(low=0, high=1, size=((H // F) + 2, (W // F) + 2, C))
+    else:
+        noise = np.random.uniform(low=0, high=1, size=((H // F) + 2, (W // F) + 2, C))
     noise = cv2.resize(noise, (W + 2 * F, H + 2 * F), interpolation=cv2.INTER_CUBIC)
     noise = noise[F: F + H, F: F + W]
     noise -= np.min(noise)
@@ -220,7 +227,7 @@ def ade_palette():
             [184, 255, 0], [0, 133, 255], [255, 214, 0], [25, 194, 194],
             [102, 255, 0], [92, 0, 255]]
 
-def custom_hf_download(pretrained_model_or_path, filename, cache_dir=annotator_ckpts_path, subfolder='', use_symlinks=USE_SYMLINKS):
+def custom_hf_download(pretrained_model_or_path, filename, cache_dir=annotator_ckpts_path, subfolder='', use_symlinks=USE_SYMLINKS, repo_type="model"):
     local_dir = os.path.join(cache_dir, pretrained_model_or_path)
     model_path = os.path.join(local_dir, *subfolder.split('/'), filename)
     
@@ -261,7 +268,8 @@ def custom_hf_download(pretrained_model_or_path, filename, cache_dir=annotator_c
             filename=filename,
             local_dir_use_symlinks=use_symlinks,
             resume_download=True,
-            etag_timeout=100
+            etag_timeout=100,
+            repo_type=repo_type
         )
         if not use_symlinks:
             try:

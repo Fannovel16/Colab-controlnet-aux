@@ -5,7 +5,10 @@ import cv2
 import yaml
 from pathlib import Path
 from enum import Enum
-from log import log
+from .log import log
+import subprocess
+import threading
+import sys
 
 here = Path(__file__).parent.resolve()
 
@@ -31,7 +34,7 @@ if os.path.exists(config_path):
 else:
     annotator_ckpts_path = str(Path(here, "./ckpts"))
     USE_SYMLINKS = False
-    ORT_PROVIDERS = ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
+    ORT_PROVIDERS = ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider", "CoreMLExecutionProvider"]
 
 os.environ['AUX_USE_SYMLINKS'] = str(USE_SYMLINKS)
 os.environ['AUX_ANNOTATOR_CKPTS_PATH'] = annotator_ckpts_path
@@ -42,10 +45,6 @@ log.info(f"Using symlinks: {USE_SYMLINKS}")
 log.info(f"Using ort providers: {ORT_PROVIDERS}")
 
 MAX_RESOLUTION=2048 #Who the hell feed 4k images to ControlNet?
-HF_MODEL_NAME = "lllyasviel/Annotators"
-DWPOSE_MODEL_NAME = "yzd-v/DWPose"
-ANIFACESEG_MODEL_NAME = "bdsqlsz/qinglong_controlnet-lllite" 
-
 
 def common_annotator_call(model, tensor_image, input_batch=False, **kwargs):
     if "detect_resolution" in kwargs:
@@ -170,3 +169,23 @@ def get_unique_axis0(data):
     unique_idxs[:1] = True
     unique_idxs[1:] = np.any(arr[:-1, :] != arr[1:, :], axis=-1)
     return arr[unique_idxs]
+
+#Ref: https://github.com/ltdrdata/ComfyUI-Manager/blob/284e90dc8296a2e1e4f14b4b2d10fba2f52f0e53/__init__.py#L14
+def handle_stream(stream, prefix):
+    for line in stream:
+        print(prefix, line, end="")
+
+
+def run_script(cmd, cwd='.'):
+    process = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+
+    stdout_thread = threading.Thread(target=handle_stream, args=(process.stdout, ""))
+    stderr_thread = threading.Thread(target=handle_stream, args=(process.stderr, "[!]"))
+
+    stdout_thread.start()
+    stderr_thread.start()
+
+    stdout_thread.join()
+    stderr_thread.join()
+
+    return process.wait()
